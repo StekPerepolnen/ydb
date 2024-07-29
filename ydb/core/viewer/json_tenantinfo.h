@@ -56,6 +56,7 @@ class TJsonTenantInfo : public TViewerPipeClient {
     THashMap<TString, std::vector<TNodeId>> TenantNodes;
     THashMap<TString, NKikimrViewer::TEvViewerResponse> OffloadMergedTabletStateResponse;
     THashMap<TString, NKikimrViewer::TEvViewerResponse> OffloadMergedSystemStateResponse;
+    THashMap<TString, NKikimrViewer::TStorageUsage::EType> StoragePoolType;
     TTabletId RootHiveId = 0;
     TString RootId; // id of root domain (tenant)
     NKikimrViewer::TTenantInfo Result;
@@ -134,6 +135,7 @@ public:
         if (Storage) {
             RequestHiveStorageStats(RootHiveId);
         }
+        RequestBSControllerPoolsInfo();
 
         if (Requests == 0) {
             ReplyAndPassAway();
@@ -167,6 +169,7 @@ public:
             hFunc(TEvTabletPipe::TEvClientConnected, TBase::Handle);
             hFunc(TEvStateStorage::TEvBoardInfo, Handle);
             hFunc(NHealthCheck::TEvSelfCheckResultProto, Handle);
+            hFunc(NSysView::TEvSysView::TEvGetStoragePoolsResponse, Handle);
             cFunc(TEvents::TSystem::Wakeup, HandleTimeout);
         }
     }
