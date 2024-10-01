@@ -234,8 +234,16 @@ struct TYdbLocation {
     NHttp::THttpOutgoingRequestPtr CreateHttpMonRequestGet(TStringBuf uri, const TRequest& request) const;
     NHttp::THttpOutgoingRequestPtr CreateHttpMonRequestGet(TStringBuf uri) const;
 
+    void SetGrpcKeepAlive(NYdbGrpc::TGRpcClientConfig& config) {
+        config.IntChannelParams[GRPC_ARG_KEEPALIVE_TIME_MS] = 20000;
+        config.IntChannelParams[GRPC_ARG_KEEPALIVE_TIMEOUT_MS] = 10000;
+        config.IntChannelParams[GRPC_ARG_HTTP2_MAX_PINGS_WITHOUT_DATA] = 0;
+        config.IntChannelParams[GRPC_ARG_KEEPALIVE_PERMIT_WITHOUT_CALLS] = 1;
+    }
+
     template <typename TGRpcService>
     std::unique_ptr<NMVP::TLoggedGrpcServiceConnection<TGRpcService>> CreateGRpcServiceConnection(const NYdbGrpc::TGRpcClientConfig& config) const {
+        SetGrpcKeepAlive(config);
         return std::unique_ptr<NMVP::TLoggedGrpcServiceConnection<TGRpcService>>(new NMVP::TLoggedGrpcServiceConnection<TGRpcService>(config, GetGRpcClientLow().CreateGRpcServiceConnection<TGRpcService>(config)));
     }
 
