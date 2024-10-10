@@ -411,6 +411,7 @@ public:
         THeaders headers(HeaderType::Headers);
         TStringBuf authorization(headers["Authorization"]);
         TStringBuf cookie(headers["Cookie"]);
+        TStringBuf set_cookie(headers["Set-Cookie"]);
         TStringBuf x_ydb_auth_ticket(headers["x-ydb-auth-ticket"]);
         TStringBuf x_yacloud_subjecttoken(headers["x-yacloud-subjecttoken"]);
         TString data(GetRawData());
@@ -424,6 +425,12 @@ public:
             auto pos = data.find(cookie);
             if (pos != TString::npos) {
                 data.replace(pos, cookie.size(), TString("<obfuscated>"));
+            }
+        }
+        if (!set_cookie.empty()) {
+            auto pos = data.find(set_cookie);
+            if (pos != TString::npos) {
+                data.replace(pos, set_cookie.size(), TString("<obfuscated>"));
             }
         }
         if (!x_ydb_auth_ticket.empty()) {
